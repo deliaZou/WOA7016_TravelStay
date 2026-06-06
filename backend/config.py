@@ -5,7 +5,7 @@ import urllib.parse
 # 填 "local"       -> 运行本地数据库 (可选择 MySQL 或 SQLite)
 # 填 "production"  -> 运行 AWS 云端数据库
 # =====================================================================
-RUNNING_ENV = "local"  # 👈 想连云端时，只需要把这里改成 "production"
+RUNNING_ENV = "production"  # 👈 想连云端时，只需要把这里改成 "production"
 
 # --- 1. AWS 云端数据库配置 ---
 CLOUD_USER = "admin"
