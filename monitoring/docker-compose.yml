@@ -5,8 +5,9 @@ services:
   mysqld-exporter:
     image: prom/mysqld-exporter:v0.15.0
     container_name: mysqld-exporter
-    environment:
-      DATA_SOURCE_NAME: 'admin:TravelStay123!@(travelstay-db.couwaczgmvhi.us-east-1.rds.amazonaws.com:3306)/'
+    volumes:
+      - ./.my.cnf:/.my.cnf
+      - ./.my.cnf:/home/.my.cnf
     ports:
       - "9104:9104"
     restart: always
