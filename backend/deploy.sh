@@ -34,6 +34,9 @@ else
 fi
 
 echo -e "${YELLOW}[3/5] 🏗️ Building the new Docker image (processing requirements.txt)...${NC}"
+# 1. Change directory into the backend folder
+cd backend
+
 sudo docker build -t ${IMAGE_NAME} .
 if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Docker build failed! Please check your Dockerfile or code syntax error.${NC}"
