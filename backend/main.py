@@ -147,3 +147,6 @@ if __name__ == "__main__":
     init_db()
     # 2. Fire up the Uvicorn local web server
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+
+Instrumentator().instrument(app).expose(app)
