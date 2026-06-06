@@ -30,3 +30,7 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin # default login: admin/admin
     restart: always
+
+networks:
+  monitor-net:
+    driver: bridge
