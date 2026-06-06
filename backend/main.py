@@ -8,8 +8,12 @@ from sqlalchemy.orm import joinedload
 from database import SessionLocal, init_db
 from models import HotelTable, RoomTable, BookingTable
 from schemas import HotelSchema, OrderCreateSchema
+from prometheus_fastapi_instrumentator import Instrumentator
+
 
 app = FastAPI(title="TravelStay Enterprise Backend API")
+# auto generate  /metrics interface
+Instrumentator().instrument(app).expose(app)
 
 # CORS Middleware Configuration
 app.add_middleware(

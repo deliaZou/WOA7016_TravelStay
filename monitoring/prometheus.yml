@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s #
+
+scrape_configs:
+  # FastAPI
+  - job_name: 'fastapi-backend'
+    metrics_path: '/metrics'
+    static_configs:
+      # public IP
+      - targets: ['52.55.249.19:8000']
+
+  # mysql
+  - job_name: 'rds-mysql'
+    static_configs:
+      - targets: ['mysqld-exporter:9104']
