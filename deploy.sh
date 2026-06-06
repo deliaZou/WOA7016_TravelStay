@@ -1,64 +1,67 @@
 #!/bin/bash
 
-# =====================================================================
-# 🚀 TravelStay Backend Docker One-Click Deployment Script
-# =====================================================================
-
-# Define text colors for better readability
+# Define colors for output
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Container and image configuration
-CONTAINER_NAME="travelstay-app"
-IMAGE_NAME="travelstay-backend"
-PORT_MAPPING="8000:8000"
-
-echo -e "${YELLOW}[1/5] 📥 Pulling the latest code from GitHub...${NC}"
+# ==========================================
+# 1. Pull latest code from GitHub
+# ==========================================
+echo -e "${YELLOW}[1/4] Pulling latest code from Git...${NC}"
 git pull
 if [ $? -ne 0 ]; then
-    echo -e "${RED}❌ Git pull failed! Please check your repository permissions or network connectivty.${NC}"
+    echo -e "${RED}Git pull failed!${NC}"
     exit 1
 fi
 
-echo -e "${YELLOW}[2/5] 🛑 Cleaning up the old Docker container...${NC}"
-# Check if the container exists; if yes, stop and remove it
-if [ "$(sudo docker ps -aq -f name=${CONTAINER_NAME})" ]; then
-    echo -e "Found existing container: ${CONTAINER_NAME}. Stopping and removing..."
-    sudo docker stop ${CONTAINER_NAME} > /dev/null
-    sudo docker rm ${CONTAINER_NAME} > /dev/null
-    echo -e "${GREEN}✓ Old container successfully removed.${NC}"
-else
-    echo -e "No existing container found. Skipping cleanup step."
+# ==========================================
+# 2. Build and restart Backend Container
+# ==========================================
+echo -e "${YELLOW}[2/4] Restarting Backend (FastAPI)...${NC}"
+# Stop and remove old container if exists
+if [ "$(sudo docker ps -aq -f name=travelstay-app)" ]; then
+    sudo docker stop travelstay-app > /dev/null
+    sudo docker rm travelstay-app > /dev/null
 fi
 
-echo -e "${YELLOW}[3/5] 🏗️ Building the new Docker image (processing requirements.txt)...${NC}"
-# 1. Change directory into the backend folder
+# Move to backend folder to build image
 cd backend
-
-sudo docker build -t ${IMAGE_NAME} .
+sudo docker build -t travelstay-backend .
 if [ $? -ne 0 ]; then
-    echo -e "${RED}❌ Docker build failed! Please check your Dockerfile or code syntax error.${NC}"
+    echo -e "${RED}Docker build failed!${NC}"
     exit 1
 fi
-echo -e "${GREEN}✓ Docker image built successfully.${NC}"
+cd ..
 
-echo -e "${YELLOW}[4/5] ▶️ Launching the new Docker container...${NC}"
-sudo docker run -d -p ${PORT_MAPPING} --name ${CONTAINER_NAME} ${IMAGE_NAME}
+# Run new backend container
+sudo docker run -d -p 8000:8000 --name travelstay-app travelstay-backend
+echo -e "${GREEN}✓ Backend is running on port 8000.${NC}"
+
+# ==========================================
+# 3. Start Monitoring Stack (Docker Compose)
+# ==========================================
+echo -e "${YELLOW}[3/4] Starting Monitoring (Prometheus & Grafana)...${NC}"
+# Move to monitoring folder and launch compose
+cd monitoring
+sudo docker-compose down
+sudo docker-compose up -d
 if [ $? -ne 0 ]; then
-    echo -e "${RED}❌ Container startup failed! Port 8000 might already be occupied.${NC}"
+    echo -e "${RED}Docker-compose failed to start!${NC}"
     exit 1
 fi
+cd ..
+echo -e "${GREEN}✓ Monitoring stack is up and running.${NC}"
 
-echo -e "${GREEN}======================================================${NC}"
-echo -e "${GREEN}🚀 [SUCCESS] Deployment completed successfully!${NC}"
-echo -e "${GREEN}The backend service is now running on port: ${PORT_MAPPING}${NC}"
-echo -e "${GREEN}======================================================${NC}"
+# ==========================================
+# 4. Status Check
+# ==========================================
+echo -e "${GREEN}=======================================${NC}"
+echo -e "${GREEN}🚀 ALL SERVICES DEPLOYED SUCCESSFULLY!${NC}"
+echo -e "${GREEN}FastAPI: http://localhost:8000${NC}"
+echo -e "${GREEN}Grafana: http://localhost:3000${NC}"
+echo -e "${GREEN}=======================================${NC}"
 
-echo -e "${YELLOW}[5/5] 📋 Displaying the last 10 lines of logs (Press Ctrl+C to exit):${NC}"
-echo "------------------------------------------------------"
-sudo docker logs --tail 10 ${CONTAINER_NAME}
-echo "------------------------------------------------------"
-# Keep tracking logs in real-time
-#sudo docker logs -f ${CONTAINER_NAME}
+#echo -e "${YELLOW}[4/4] Showing recent logs of FastAPI...${NC}"
+#sudo docker logs --tail 10 travelstay-app
