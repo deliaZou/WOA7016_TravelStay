@@ -1,48 +1,41 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from config import DATABASE_URL, connect_args
-from models import Base, HotelTable, RoomTable
+from sqlalchemy.orm import declarative_base, sessionmaker, Session
 
-# Create engine for AWS RDS MySQL
-engine = create_engine(
-    DATABASE_URL,
-    connect_args=connect_args,
-    pool_pre_ping=True if "mysql" in DATABASE_URL else False # 只有MySQL需要心跳检测
-)
+# 1. two db link
+PRIMARY_DB_URL = "mysql+pymysql://admin:TravelStay123!@travelstay-db.couwaczgmvhi.us-east-1.rds.amazonaws.com:3306/travelstay"
+REPLICA_DB_URL = "mysql+pymysql://admin:TravelStay123!@travelstay-db-replica.couwaczgmvhi.us-east-1.rds.amazonaws.com:3306/travelstay"
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# 2. two db Engine
+primary_engine = create_engine(PRIMARY_DB_URL, pool_pre_ping=True)
+replica_engine = create_engine(REPLICA_DB_URL, pool_pre_ping=True)
+
+Base = declarative_base()
 
 
-def init_db():
-    """
-    Automatically creates all tables on AWS RDS and injects English mock data.
-    """
-    # 1. Trigger SQLAlchemy to auto-create missing tables on AWS
-    Base.metadata.create_all(bind=engine)
+# 3. 核心：自定义 RoutingSession 实现智能分流
+class RoutingSession(Session):
+    def get_bind(self, mapper=None, clause=None, **kw):
+        """
+        每次执行 SQL 时，SQLAlchemy 都会调用这个方法来决定用哪个引擎
+        """
+        # 如果是编译好的 SQL 语句，且是以 SELECT 开头的，走只读副本
+        if self._flushing:
+            return primary_engine
 
+        if clause is not None and hasattr(clause, "is_select") and clause.is_select:
+            return replica_engine
+
+        # 其余所有操作（INSERT, UPDATE, DELETE 等）全部走主库
+        return primary_engine
+
+
+# 4. 用刚才自定义的 RoutingSession 生成 SessionLocal
+SessionLocal = sessionmaker(class_=RoutingSession, autocommit=False, autoflush=False)
+
+
+def get_db():
     db = SessionLocal()
     try:
-        # 2. Inject initial data if the database is empty
-        if not db.query(HotelTable).first():
-            # Create a demo hotel with English values
-            new_hotel = HotelTable(
-                name="The Peninsula Resort",
-                location="Sanya",
-                image_url="https://via.placeholder.com/300"
-            )
-            db.add(new_hotel)
-            db.commit()  # Commit to generate the auto-increment ID
-
-            # Create room inventory for this hotel
-            rooms = [
-                RoomTable(hotel_id=new_hotel.id, type_name="Single Room", price=1299, remaining=5),
-                RoomTable(hotel_id=new_hotel.id, type_name="Double Room", price=2199, remaining=2),
-                RoomTable(hotel_id=new_hotel.id, type_name="Presidential Suite", price=8888, remaining=0)
-            ]
-            db.add_all(rooms)
-            db.commit()
-            print("Successfully initialized AWS RDS with English mock data!")
-    except Exception as e:
-        print(f"Error initializing database: {e}")
+        yield db
     finally:
         db.close()

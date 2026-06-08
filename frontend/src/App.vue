@@ -79,7 +79,7 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 // 1. 统一 API 地址
-const API_BASE_URL = 'http://54.204.151.128:8000/api';
+const API_BASE_URL = 'http://travelstay-alb-1315207679.us-east-1.elb.amazonaws.com/api';
 
 // 2. 基础状态控制
 const hotels = ref([]);
