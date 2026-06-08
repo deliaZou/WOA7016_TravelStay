@@ -7,7 +7,7 @@ scrape_configs:
     metrics_path: '/metrics'
     static_configs:
       # public IP
-      - targets: ['54.204.151.128:8000']
+      - targets: ['localhost:8000']
 
   # mysql
   - job_name: 'rds-mysql'
