@@ -16,4 +16,4 @@ scrape_configs:
 
   - job_name: 'rds-mysql-replica'
     static_configs:
-      - targets: [ 'mysqld-exporter-replica:9105' ]
+      - targets: [ 'mysqld-exporter-replica:9104' ]
