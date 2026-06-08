@@ -10,7 +10,7 @@ RUNNING_ENV = "production"  # 👈 想连云端时，只需要把这里改成 "p
 # --- 1. AWS 云端数据库配置 ---
 CLOUD_USER = "admin"
 CLOUD_PASSWORD = "TravelStay123!"  # 你的密码
-CLOUD_HOST = "travelstay-db.couwaczgmvhi.us-east-1.rds.amazonaws.com"
+CLOUD_HOST = "travelstay-db-subnet-group.couwaczgmvhi.us-east-1.rds.amazonaws.com"
 CLOUD_PORT = "3306"
 CLOUD_NAME = "travelstay"
 CLOUD_SAFE_PWD = urllib.parse.quote_plus(CLOUD_PASSWORD)
