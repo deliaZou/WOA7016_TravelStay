@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 
-from database import SessionLocal, init_db
+from database import SessionLocal
 from models import HotelTable, RoomTable, BookingTable
 from schemas import HotelSchema, OrderCreateSchema
 from prometheus_fastapi_instrumentator import Instrumentator
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     import uvicorn
 
     # 1. Trigger the cloud migration & data seeding first
-    init_db()
+    # init_db()
     # 2. Fire up the Uvicorn local web server
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
 
