@@ -12,6 +12,17 @@ services:
       - "9104:9104"
     restart: always
 
+  # 1. MySQL-replica
+  mysqld-exporter-replica:
+    image: prom/mysqld-exporter:v0.15.0
+    container_name: mysqld-exporter-replica
+    volumes:
+      - ./.my-replica.cnf:/.my.cnf
+      - ./.my-replica.cnf:/home/.my.cnf
+    ports:
+      - "9105:9104"
+    restart: always
+
   # 2. Prometheus
   prometheus:
     image: prom/prometheus:v2.45.0
