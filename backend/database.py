@@ -3,8 +3,10 @@ from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from sqlalchemy.sql.selectable import Select
 
 # 1. two db link
-PRIMARY_DB_URL = "mysql+pymysql://admin:TravelStay123!@travelstay-db-subnet-group.couwaczgmvhi.us-east-1.rds.amazonaws.com:3306/travelstay"
-REPLICA_DB_URL = "mysql+pymysql://admin:TravelStay123!@travelstay-db-replica1.couwaczgmvhi.us-east-1.rds.amazonaws.com:3306/travelstay"
+# PRIMARY_DB_URL = "mysql+pymysql://admin:TravelStay123!@travelstay-db-subnet-group.couwaczgmvhi.us-east-1.rds.amazonaws.com:3306/travelstay"
+# REPLICA_DB_URL = "mysql+pymysql://admin:TravelStay123!@travelstay-db-replica1.couwaczgmvhi.us-east-1.rds.amazonaws.com:3306/travelstay"
+PRIMARY_DB_URL = "mysql+pymysql://admin:TravelStay123!@travelstay-db.cqqajcq9u9pj.us-east-1.rds.amazonaws.com:3306/travelstay"
+REPLICA_DB_URL = "mysql+pymysql://admin:TravelStay123!@travelstay-db-replica1.cqqajcq9u9pj.us-east-1.rds.amazonaws.com:3306/travelstay"
 
 # 2. two db Engine
 primary_engine = create_engine(PRIMARY_DB_URL, pool_pre_ping=True)
