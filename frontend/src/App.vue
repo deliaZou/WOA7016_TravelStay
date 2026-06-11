@@ -1,14 +1,14 @@
 <template>
   <div class="travelstay-container">
     <header>
-      <h1>TravelStay 豪华酒店预订系统</h1>
+      <h1>TravelStay Luxury Hotel Booking</h1>
       <p class="tagline">Security-First | Luxury Experience</p>
       <div class="header-actions">
-        <button class="btn-search-trigger" @click="showSearchModal = true">🔍 查找我的订单</button>
+        <button class="btn-search-trigger" @click="showSearchModal = true">🔍 search my booking</button>
       </div>
     </header>
 
-    <div v-if="loading" class="loading">加载中...</div>
+    <div v-if="loading" class="loading">loading...</div>
     
     <div v-else class="hotel-grid">
       <div v-for="hotel in hotels" :key="hotel.id" class="hotel-card">
@@ -19,19 +19,19 @@
           <p class="location">{{ hotel.location }}</p>
           
           <div class="room-types">
-            <h3>房型选择：</h3>
+            <h3>Room Type：</h3>
             <ul>
               <li v-for="room in hotel.rooms" :key="room.type" class="room-item">
-                <span>{{ room.type }} - ￥{{ room.price }}</span>
+                <span>{{ room.type }} - $ {{ room.price }}</span>
                 
                 <button 
                   :disabled="room.remaining <= 0" 
                   @click="openBookingModal(hotel, room)"
                   :class="{ 'btn-disabled': room.remaining <= 0 }"
                 >
-                  {{ room.remaining > 0 ? '立即预订' : '已售罄' }}
+                  {{ room.remaining > 0 ? 'order' : 'Sold out' }}
                 </button>
-                <span class="stock-label">仅剩 {{ room.remaining }} 间</span>
+                <span class="stock-label"> {{ room.remaining }} left</span>
               </li>
             </ul>
           </div>
@@ -41,24 +41,24 @@
 
     <div v-if="showModal" class="modal">
       <div class="modal-content">
-        <h2>确认预订: {{ selectedHotel?.name }}</h2>
-        <p>房型: {{ selectedRoom?.type }}</p>
-        <input v-model.number="number" type="number" placeholder="预定数量" />
-        <input v-model="customerName" placeholder="客户姓名" />
-        <input v-model="email" placeholder="客户邮箱" />
-        <input v-model="passport" placeholder="护照号" />
+        <h2>comfirm: {{ selectedHotel?.name }}</h2>
+        <p>room type: {{ selectedRoom?.type }}</p>
+        <input v-model.number="number" type="number" placeholder="amount" />
+        <input v-model="customerName" placeholder="name" />
+        <input v-model="email" placeholder="email" />
+        <input v-model="passport" placeholder="passport" />
         <div class="actions">
-          <button @click="submitBooking">提交订单</button>
-          <button @click="showModal = false">取消</button>
+          <button @click="submitBooking">submit</button>
+          <button @click="showModal = false">cancel</button>
         </div>
       </div>
     </div>
 
     <div v-if="showSearchModal" class="modal">
       <div class="modal-content">
-        <h2>订单查询</h2>
+        <h2>order search</h2>
         <div class="search-box">
-          <input v-model="searchQuery" placeholder="请输入订单号或姓名" />
+          <input v-model="searchQuery" placeholder="please put in order ID" />
           <button @click="handleSearch">SEARCH</button>
         </div>
         <div v-if="searchResult" class="result-area">
@@ -68,7 +68,7 @@
           <p><strong>order ID:</strong> {{ searchResult.order_id }}</p>
           <p><strong>room count:</strong> {{ searchResult.quantity }}</p>
         </div>
-        <button class="close-btn" @click="showSearchModal = false">关闭</button>
+        <button class="close-btn" @click="showSearchModal = false">close</button>
       </div>
     </div>
   </div>
@@ -77,6 +77,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { ElMessage } from 'element-plus'
+import 'element-plus/dist/index.css'
 
 // 1. 统一 API 地址
 const API_BASE_URL = 'http://travelstay-alb-1315207679.us-east-1.elb.amazonaws.com/api';
@@ -106,7 +108,7 @@ const fetchHotels = async () => {
     hotels.value = response.data;
     loading.value = false;
   } catch (error) {
-    console.error("获取酒店失败:", error);
+    console.error("can't find hotels:", error);
     loading.value = false;
   }
 };
@@ -122,7 +124,14 @@ const openBookingModal = (hotel, room) => {
 const submitBooking = async () => {
   // 核心修改：使用 .trim() 替换 .strip
   if (!customerName.value || !customerName.value.trim() || !email.value || !email.value.trim()) {
-    return alert("请完善客户姓名与邮箱");
+    return ElMessage({
+  message: 'please put in email and passport',
+  type: 'error',        // 红色错误样式 (还可以是 'success', 'warning', 'info')
+  plain: true,          // 朴素样式，更轻量
+  grouping: true,       // 如果连续触发，会自动合并，防止满屏都是弹窗
+  duration: 4000        // 4秒后自动消失
+})
+    // alert("please put in email and passport");
   }
 
   try {
@@ -136,7 +145,14 @@ const submitBooking = async () => {
     });
 
     if (response.data.status === 'success') {
-      alert(`预订成功！单号：${response.data.order_id}`);
+      ElMessage({
+  message: `order succeed！order ID：${response.data.order_id}`,
+  type: 'success',        // 红色错误样式 (还可以是 'success', 'warning', 'info')
+  plain: true,          // 朴素样式，更轻量
+  grouping: true,       // 如果连续触发，会自动合并，防止满屏都是弹窗
+  duration: 4000        // 4秒后自动消失
+})
+      // alert(`order succeed！order ID：${response.data.order_id}`);
 
       // 自动刷新页面最新库存
       fetchHotels();
@@ -149,7 +165,14 @@ const submitBooking = async () => {
       number.value = 1;
     }
   } catch (err) {
-    alert(err.response?.data?.detail || "下单失败，请检查网络");
+          ElMessage({
+  message: err.response?.data?.detail || "order failed",
+  type: 'error',        // 红色错误样式 (还可以是 'success', 'warning', 'info')
+  plain: true,          // 朴素样式，更轻量
+  grouping: true,       // 如果连续触发，会自动合并，防止满屏都是弹窗
+  duration: 4000        // 4秒后自动消失
+})
+    // alert(err.response?.data?.detail || "order failed");
   }
 };
 
@@ -157,7 +180,14 @@ const submitBooking = async () => {
 const handleSearch = async () => {
   // 核心修改：使用 .trim() 替换 .strip
   if (!searchQuery.value || !searchQuery.value.trim()) {
-    return alert("请输入查询内容");
+    return ElMessage({
+  message: "please put in search information",
+  type: 'error',        // 红色错误样式 (还可以是 'success', 'warning', 'info')
+  plain: true,          // 朴素样式，更轻量
+  grouping: true,       // 如果连续触发，会自动合并，防止满屏都是弹窗
+  duration: 4000        // 4秒后自动消失
+})
+    // alert("please put in search information");
   }
 
   try {
@@ -168,11 +198,25 @@ const handleSearch = async () => {
     if (response.data && response.data.length > 0) {
       searchResult.value = response.data[0];
     } else {
-      alert("未找到相关订单");
+      ElMessage({
+  message: "can't find any",
+  type: 'error',        // 红色错误样式 (还可以是 'success', 'warning', 'info')
+  plain: true,          // 朴素样式，更轻量
+  grouping: true,       // 如果连续触发，会自动合并，防止满屏都是弹窗
+  duration: 4000        // 4秒后自动消失
+})
+      // alert("can't find any");
       searchResult.value = null;
     }
   } catch (error) {
-    alert("搜索发生错误");
+    ElMessage({
+  message: "something went wrong",
+  type: 'error',        // 红色错误样式 (还可以是 'success', 'warning', 'info')
+  plain: true,          // 朴素样式，更轻量
+  grouping: true,       // 如果连续触发，会自动合并，防止满屏都是弹窗
+  duration: 4000        // 4秒后自动消失
+})
+    // alert("something wrong");
     searchResult.value = null;
   }
 };

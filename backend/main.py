@@ -32,6 +32,7 @@ async def get_hotels():
     Architect Tip: This read request can be distributed to Read Replicas in production.
     """
     db = SessionLocal()
+    db.bind = primary_engine
     try:
         hotels = db.query(HotelTable).options(joinedload(HotelTable.rooms)).all()
         return hotels
