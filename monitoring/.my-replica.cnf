@@ -1,5 +1,5 @@
 [client]
 user=admin
 password=TravelStay123!
-host=travelstay-db-replica1.couwaczgmvhi.us-east-1.rds.amazonaws.com
+host=travelstay-db-replica1.cqqajcq9u9pj.us-east-1.rds.amazonaws.com
 port=3306
