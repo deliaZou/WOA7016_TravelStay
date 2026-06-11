@@ -81,7 +81,7 @@ import { ElMessage } from 'element-plus'
 import 'element-plus/dist/index.css'
 
 // 1. 统一 API 地址
-const API_BASE_URL = 'http://travelstay-alb-1315207679.us-east-1.elb.amazonaws.com/api';
+const API_BASE_URL = 'http://travelstay-alb-1359388780.us-east-1.elb.amazonaws.com/api';
 
 // 2. 基础状态控制
 const hotels = ref([]);
