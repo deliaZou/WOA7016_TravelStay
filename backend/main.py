@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 
-from database import SessionLocal
+from database import SessionLocal, primary_engine
 from models import HotelTable, RoomTable, BookingTable
 from schemas import HotelSchema, OrderCreateSchema
 from prometheus_fastapi_instrumentator import Instrumentator
