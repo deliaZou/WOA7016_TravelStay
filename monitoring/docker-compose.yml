@@ -43,6 +43,11 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin # default login: admin/admin
     restart: always
 
+  travelstay-app:
+    image: travelstay-backend
+    restart: always
+    ports:
+      - "8000:8000"
 networks:
   monitor-net:
     driver: bridge
